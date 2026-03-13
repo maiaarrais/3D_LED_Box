@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Five Epochs of Life — Brain Topology</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Share+Tech+Mono&display=swap');
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root { --ec: #00ffcc; --eg: #00ffcc35; }
+  body { background:#020608; color:#aaffcc; font-family:'Share Tech Mono',monospace; height:100vh; overflow:hidden; display:flex; flex-direction:column; }
+
+  #header { padding:8px 18px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #0a1a12; background:rgba(1,4,3,0.98); flex-shrink:0; z-index:10; }
+  #header h1 { font-family:'Cinzel',serif; font-size:12px; font-weight:900; letter-spacing:4px; color:var(--ec); text-shadow:0 0 18px var(--eg); transition:color 1.2s,text-shadow 1.2s; }
+  #header .sub { font-size:9px; color:#0f2a1a; letter-spacing:1px; }
+
+  #wrap { flex:1; position:relative; overflow:hidden; }
+  canvas { display:block; width:100%!important; height:100%!important; }
+
+  #panel { position:absolute; left:12px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:5px; z-index:10; }
+  .ebtn { font-family:'Share Tech Mono',monospace; font-size:8.5px; letter-spacing:1.2px; padding:9px 13px 9px 15px; background:rgba(0,0,0,0.5); border:1px solid #091a10; border-left:2px solid transparent; cursor:pointer; transition:all 0.35s; text-align:left; color:#1a4028; text-transform:uppercase; min-width:155px; }
+  .ebtn:hover { color:#3a8055; border-color:#1a4028; background:rgba(0,30,15,0.6); }
+  .ebtn.active { color:var(--ec); border-color:var(--ec); border-left-color:var(--ec); background:rgba(0,0,0,0.7); box-shadow:0 0 12px var(--eg); text-shadow:0 0 8px var(--eg); }
+  .enum { display:block; font-size:6.5px; color:#0a3018; margin-bottom:2px; letter-spacing:2px; transition:color 0.35s; }
+  .ebtn.active .enum { color:var(--ec); opacity:0.55; }
+  .eage { display:block; font-size:7px; color:#0a2010; margin-top:2px; transition:color 0.35s; }
+  .ebtn.active .eage { color:var(--ec); opacity:0.4; }
+
+  #card { position:absolute; right:12px; top:50%; transform:translateY(-50%); width:232px; border:1px solid #0a1a12; background:rgba(1,3,2,0.94); padding:15px 17px; z-index:10; }
+  #card .ctitle { font-family:'Cinzel',serif; font-size:14px; font-weight:900; color:var(--ec); text-shadow:0 0 12px var(--eg); display:block; margin-bottom:2px; transition:color 1s,text-shadow 1s; }
+  #card .crange { font-size:7px; letter-spacing:2px; color:#0f3020; text-transform:uppercase; display:block; margin-bottom:3px; }
+  #card .ctheme { font-size:7.5px; letter-spacing:1.5px; color:#0f3822; text-transform:uppercase; display:block; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #091510; }
+  #card .csection { font-size:8px; color:#1a4a2a; line-height:1.85; margin-bottom:8px; }
+  #card .csection span { color:var(--ec); opacity:0.6; display:block; font-size:7px; letter-spacing:1px; margin-bottom:3px; }
+  #card .cdriv { font-size:7.5px; color:#0f3020; margin-top:8px; padding-top:8px; border-top:1px solid #091510; line-height:1.8; }
+  #card .cdriv b { color:var(--ec); opacity:0.65; }
+
+  #legend { position:absolute; bottom:58px; right:12px; font-size:8px; color:#0f2818; line-height:2.1; z-index:10; }
+  .ldot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+
+  #controls { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); display:flex; gap:5px; z-index:10; }
+  .cbtn { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:1px; padding:6px 11px; background:rgba(0,255,153,0.03); color:#00ff99; border:1px solid #00ff9920; cursor:pointer; transition:all 0.2s; text-transform:uppercase; }
+  .cbtn:hover,.cbtn.active { background:rgba(0,255,153,0.1); border-color:#00ff99; box-shadow:0 0 8px #00ff9920; }
+
+  #dots { position:absolute; bottom:58px; left:50%; transform:translateX(-50%); display:flex; gap:7px; align-items:center; z-index:10; }
+  .dot { width:5px; height:5px; border-radius:50%; background:#0a1a10; border:1px solid #0a2818; transition:all 0.5s; }
+  .dot.active { background:var(--ec); box-shadow:0 0 7px var(--eg); }
+
+  #source { position:absolute; bottom:12px; right:12px; font-size:7px; color:#0a1e10; letter-spacing:0.5px; z-index:10; }
+</style>
+</head>
+<body>
+<div id="header">
+  <h1 id="htitle">TOPOLOGICAL EPOCHS OF THE HUMAN BRAIN</h1>
+  <p class="sub">DRAG TO ROTATE &nbsp;·&nbsp; SCROLL TO ZOOM &nbsp;·&nbsp; MOUSLEY ET AL., NATURE COMMS 2025</p>
+</div>
+
+<div id="wrap">
+  <canvas id="c"></canvas>
+
+  <div id="panel">
+    <button class="ebtn active" onclick="setEpoch(0)">
+      <span class="enum">EPOCH I</span>
+      ✦ Infancy &amp; Childhood
+      <span class="eage">0 – 9 years</span>
+    </button>
+    <button class="ebtn" onclick="setEpoch(1)">
+      <span class="enum">EPOCH II</span>
+      ◈ Adolescence
+      <span class="eage">9 – 32 years</span>
+    </button>
+    <button class="ebtn" onclick="setEpoch(2)">
+      <span class="enum">EPOCH III</span>
+      ◉ Adulthood
+      <span class="eage">32 – 66 years</span>
+    </button>
+    <button class="ebtn" onclick="setEpoch(3)">
+      <span class="enum">EPOCH IV</span>
+      ◌ Early Aging
+      <span class="eage">66 – 83 years</span>
+    </button>
+    <button class="ebtn" onclick="setEpoch(4)">
+      <span class="enum">EPOCH V</span>
+      ◯ Late Aging
+      <span class="eage">83 – 90+ years</span>
+    </button>
+  </div>
+
+  <div id="card">
+    <span class="ctitle" id="ctitle">Infancy &amp; Childhood</span>
+    <span class="crange" id="crange">0 – 9 years · Turning point: age 9</span>
+    <span class="ctheme" id="ctheme">Decreasing global integration · Rising clustering</span>
+    <div class="csection" id="csci"><span>NEUROSCIENCE</span>placeholder</div>
+    <div class="csection" id="cvis"><span>VISUAL PATTERN</span>placeholder</div>
+    <div class="cdriv" id="cdriv">placeholder</div>
+  </div>
+
+  <div id="dots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <div id="controls">
+    <button class="cbtn" id="bAuto" onclick="toggleAuto()">⟳ AUTO-ROTATE</button>
+    <button class="cbtn" id="bCycle" onclick="toggleCycle()">◎ AUTO-CYCLE EPOCHS</button>
+  </div>
+
+  <div id="legend">
+    <div><span class="ldot" style="background:#2255ff;box-shadow:0 0 4px #2255ff80"></span>Layer 1 — Blue</div>
+    <div><span class="ldot" style="background:#ff2233;box-shadow:0 0 4px #ff223380"></span>Layer 2 — Red</div>
+    <div><span class="ldot" style="background:#00ff55;box-shadow:0 0 4px #00ff5580"></span>Layer 3 — Green</div>
+    <div><span class="ldot" style="background:#ffee22;box-shadow:0 0 4px #ffee2280"></span>Layer 4 — Yellow</div>
+  </div>
+
+  <div id="source">Mousley, Bethlehem, Yeh &amp; Astle &nbsp;·&nbsp; Nature Communications (2025) 16:10055</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// EPOCH DATA — grounded directly in Mousley et al. 2025
+// ─────────────────────────────────────────────────────────────────────────────
+const EPOCHS = [
+  {
+    name: "Infancy &amp; Childhood",
+    range: "0 – 9 years &nbsp;·&nbsp; Turning point: age 9",
+    theme: "Decreasing global integration · Rising local clustering",
+    sci: "Dense but weak networks at birth become sparser. Global efficiency decreases as synaptic elimination prunes weak connections. Clustering coefficient is the key age-predictor: neighbouring nodes grow more tightly interconnected. Small-worldness shows the largest directional increase.",
+    vis: "All 4 layers fire rapidly and chaotically — dense, noisy clusters form and dissolve. Reflects explosive synaptogenesis followed by competitive elimination. Every layer equally active, mirroring the high but inefficient density of the early brain.",
+    driv: "Driving metric: <b>Clustering Coefficient</b> &nbsp;·&nbsp; Strongest direction: <b>Small-Worldness ↑</b>",
+    color: "#00ffcc", glow: "#00ffcc35",
+  },
+  {
+    name: "Adolescence",
+    range: "9 – 32 years &nbsp;·&nbsp; Turning point: age 32 (strongest)",
+    theme: "Peak efficiency · Small-world architecture rises",
+    sci: "All topological measures shift simultaneously — the most complex epoch. Global efficiency peaks at age 29. Small-worldness maximises, meaning the network becomes both more globally efficient AND more locally specialised. Modularity decreases. The 32-year turning point is the strongest in the entire lifespan.",
+    vis: "Traveling waves sweep bottom-to-top through the cube while branching structures grow outward from each layer. The most dynamic and varied pattern — reflecting the simultaneous rise of global integration and local specialisation.",
+    driv: "Driving metric: <b>Small-Worldness</b> &nbsp;·&nbsp; Strongest direction: <b>Global Efficiency ↑ → peaks → ↓ at 32</b>",
+    color: "#44aaff", glow: "#44aaff35",
+  },
+  {
+    name: "Adulthood",
+    range: "32 – 66 years &nbsp;·&nbsp; Turning point: age 66",
+    theme: "Stable structure · Segregation gradually rises",
+    sci: "The longest epoch — three decades of slow, predictable change. Integration declines steadily. Local efficiency and clustering coefficient (highly correlated, r=0.91) both increase, indicating rising local connectivity between neighbouring regions. No sudden reversals: the topologically stable plateau of life.",
+    vis: "Slow, symmetrical, repeating wave patterns. All 4 layers pulse in coordinated rhythm — organized, balanced, efficient. The most structured and synchronized state of the cube, with gentle periodic modulation.",
+    driv: "Driving metric: <b>Local Efficiency</b> &nbsp;·&nbsp; Strongest direction: <b>Clustering Coefficient ↑</b>",
+    color: "#88ffaa", glow: "#88ffaa35",
+  },
+  {
+    name: "Early Aging",
+    range: "66 – 83 years &nbsp;·&nbsp; Turning point: age 83",
+    theme: "Network fragmentation · Modularity dominates",
+    sci: "Only 4 topological metrics remain significantly correlated with age. Modularity becomes dominant — the brain increasingly separates into distinct, less-communicating modules. The 66-year turning point is unique: it shows significant shifts across ALL 3 principal components despite no directional reversals.",
+    vis: "Layers decouple and pulse independently. Each horizontal layer fires as its own module with growing gaps between them. Inter-layer connections fade. The once-unified cube fragments into isolated planes, each dimming at its own rate.",
+    driv: "Driving metric: <b>Modularity</b> &nbsp;·&nbsp; Pattern: brain increasingly separates into segregated subgroups",
+    color: "#ffaa44", glow: "#ffaa4435",
+  },
+  {
+    name: "Late Aging",
+    range: "83 – 90+ years &nbsp;·&nbsp; Final epoch",
+    theme: "Topology–age relationship dissolves",
+    sci: "Only subgraph centrality remains significantly associated with age — and only in 10 specific brain regions: cuneus (bilateral), superior/middle occipital gyri, and postcentral gyrus. The global age–topology relationship has dissolved. Individual nodes carry the last meaningful signal.",
+    vis: "Nearly all LEDs extinguished. Only a sparse, fixed constellation breathes slowly — representing the 10 remaining age-sensitive regions. Deep, slow pulses. The brain reduced to its essential architecture.",
+    driv: "Driving metric: <b>Subgraph Centrality</b> &nbsp;·&nbsp; Active regions: cuneus, occipital gyri, postcentral gyrus",
+    color: "#aaaaff", glow: "#aaaaff35",
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THREE.JS SETUP
+// ─────────────────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x020608);
+scene.fog = new THREE.FogExp2(0x020608, 0.004);
+
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 3000);
+
+scene.add(new THREE.AmbientLight(0x112233, 1.0));
+const sun = new THREE.DirectionalLight(0x88ccaa, 0.45);
+sun.position.set(250, 400, 200); sun.castShadow = true; scene.add(sun);
+const fill = new THREE.DirectionalLight(0x1a3322, 0.2);
+fill.position.set(-200, 80, -100); scene.add(fill);
+const ptMain = new THREE.PointLight(0x00ff88, 1.8, 600);
+ptMain.position.set(0, 130, 0); scene.add(ptMain);
+
+scene.add(new THREE.GridHelper(500, 22, 0x091510, 0x050e08));
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CUBE GEOMETRY
+// ─────────────────────────────────────────────────────────────────────────────
+const HOLES = [
+  [-29.2,-34.5],[-7.3,-35.1],[16.5,-35.0],[40.5,-35.5],
+  [-29.6,-12.5],[-7.6,-13.0],[16.2,-13.0],[40.3,-13.6],
+  [-29.3, 13.6],[-7.4, 13.1],[16.5, 13.0],[40.6, 12.5],
+  [-29.3, 37.4],[-7.4, 37.0],[16.5, 36.9],[40.6, 36.5],
+];
+const OX=6.5, OY=1.0;
+const tx = x => x - OX;
+const tz = y => y - OY;
+const BASE_H = 6;
+const LAYER_YS = [BASE_H+2, BASE_H+27, BASE_H+52, BASE_H+77];
+
+// Fixed layer colors — Blue / Red / Green / Yellow
+const LAYER_COLORS = [
+  new THREE.Color(0x2255ff),
+  new THREE.Color(0xff2233),
+  new THREE.Color(0x00ff55),
+  new THREE.Color(0xffee22),
+];
+const LAYER_EMISSIVE = [
+  new THREE.Color(0x0011aa),
+  new THREE.Color(0xaa0011),
+  new THREE.Color(0x00aa33),
+  new THREE.Color(0xaa9900),
+];
+
+const matBase  = new THREE.MeshPhongMaterial({color:0x0a2e18, transparent:true, opacity:0.5, shininess:60});
+const matLeg   = new THREE.MeshPhongMaterial({color:0x551a00, transparent:true, opacity:0.55, shininess:60});
+const matBoard = new THREE.MeshPhongMaterial({color:0x0a2244, transparent:true, opacity:0.28, shininess:80, side:THREE.DoubleSide});
+
+const grpBase=new THREE.Group(), grpLegs=new THREE.Group(), grpBoards=new THREE.Group(), grpGlows=new THREE.Group();
+scene.add(grpBase, grpLegs, grpBoards, grpGlows);
+
+function mkBox(grp,x0,y0,z0,x1,y1,z1,mat){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(Math.abs(x1-x0),Math.abs(y1-y0),Math.abs(z1-z0)),mat);
+  m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); m.castShadow=true; m.receiveShadow=true; grp.add(m);
+}
+function mkCyl(grp,cx,cy,cz,r,h,mat){
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,12),mat);
+  m.position.set(cx,cy,cz); m.castShadow=true; grp.add(m);
+}
+
+mkBox(grpBase,-43.5,0,-46,43.5,BASE_H,46,matBase);
+[[-41,44.6],[39.1,44.4],[39.6,-41.7],[-41.1,-41.5]].forEach(([hx,hy])=>mkCyl(grpBase,tx(hx),BASE_H+2,tz(hy),4,4,matBase));
+[[tx(-38),tz(-45)],[tx(51),tz(-45)],[tx(51),tz(47)],[tx(-38),tz(47)]].forEach(([lx,lz])=>mkBox(grpLegs,lx-3,BASE_H,lz-3,lx+3,BASE_H+80,lz+3,matLeg));
+
+LAYER_YS.forEach((layY,i)=>{
+  const bm=matBoard.clone(); bm.color.setHSL(0.58+i*0.04,0.7,0.28);
+  mkBox(grpBoards,tx(-38),layY,tz(-45),tx(51),layY+1.6,tz(47),bm);
+  HOLES.forEach(([hx,hy])=>{
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(2.6,0.35,6,14),new THREE.MeshPhongMaterial({color:0x1a3355,emissive:0x080f22,shininess:60}));
+    ring.rotation.x=Math.PI/2; ring.position.set(tx(hx),layY+1.7,tz(hy)); grpBoards.add(ring);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LED GLOW SPHERES
+// ─────────────────────────────────────────────────────────────────────────────
+const leds = [];
+
+HOLES.forEach(([hx,hy], hIdx) => {
+  LAYER_YS.forEach((layY, layerIdx) => {
+    const thx=tx(hx), thz=tz(hy), baseY=layY+1.6;
+
+    const mat = new THREE.MeshPhongMaterial({
+      color: LAYER_COLORS[layerIdx].clone(),
+      emissive: LAYER_EMISSIVE[layerIdx].clone(),
+      emissiveIntensity: 0,
+      transparent: true, opacity: 0.02
+    });
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(2.9, 10, 8), mat);
+    mesh.position.set(thx, baseY+3.2, thz);
+    grpGlows.add(mesh);
+
+    let pl = null;
+    if (hIdx % 4 === 1) {
+      pl = new THREE.PointLight(LAYER_COLORS[layerIdx].clone(), 0, 55);
+      pl.position.set(thx, baseY+6, thz);
+      grpGlows.add(pl);
+    }
+
+    leds.push({
+      mesh, light:pl,
+      x: hIdx%4, z: Math.floor(hIdx/4), y: layerIdx,
+      layerIdx, hIdx,
+      phase:      Math.random()*Math.PI*2,
+      spawnT:     Math.random()*100,
+      travelT:    Math.random()*100,
+      wavePhase:  Math.random()*Math.PI*2,
+      clusterGroup: Math.floor(Math.random()*4),
+      brightness: 0,
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BRIGHTNESS — each pattern is driven by the paper's topology findings
+// ─────────────────────────────────────────────────────────────────────────────
+function computeBrightness(led, epoch, t) {
+  const {x, z, y, layerIdx, phase, wavePhase, spawnT, clusterGroup, hIdx} = led;
+  const cx=1.5, cz=1.5;
+
+  switch(epoch) {
+
+    case 0: {
+      // EPOCH I: 0–9 yrs
+      // High density, chaotic, clustering-dominated
+      // Dense random flicker + cluster pulses, all layers equally active
+      const spawnCycle = (t * 2.2 + spawnT) % 4.0;
+      const spawnPulse = spawnCycle < 0.45 ? 1.0 : 0.0;
+      const clusterPulse = Math.sin(t * 1.1 + clusterGroup * 1.4) * 0.5 + 0.5;
+      const localCluster = Math.sin(t * 1.8 + x * 1.2 + z * 1.1 + wavePhase) * 0.5 + 0.5;
+      const flicker = Math.random() < 0.018 ? 1.0 : 0;
+      return Math.max(spawnPulse * clusterPulse, localCluster * 0.55, flicker) * (0.6 + Math.random()*0.4);
+    }
+
+    case 1: {
+      // EPOCH II: 9–32 yrs
+      // Small-world peak: global efficiency AND local specialisation both rise
+      // Traveling path = global efficiency (short paths), branching = local clustering
+      const pathX = Math.sin(t * 0.65 + y * 0.9) * 1.8 + cx;
+      const pathZ = Math.cos(t * 0.50 + y * 0.7) * 1.8 + cz;
+      const distPath = Math.sqrt((x-pathX)**2 + (z-pathZ)**2);
+      const pathLight = Math.max(0, 1.0 - distPath * 0.55);
+      const globalWave = Math.sin(t * 1.3 - (Math.abs(x-cx)+Math.abs(z-cz)) * 0.7) * 0.5 + 0.5;
+      const localSpec  = Math.sin(t * 1.8 + x * 1.0 + z * 0.8 + wavePhase) * 0.5 + 0.5;
+      const branch = localSpec > 0.7 ? (localSpec-0.7)*3.3 : 0;
+      // Upper layers slightly brighter — rising efficiency
+      const layerBoost = 1.0 + layerIdx * 0.15;
+      return Math.max(pathLight*0.9, globalWave*0.65, branch*0.75) * layerBoost;
+    }
+
+    case 2: {
+      // EPOCH III: 32–66 yrs
+      // Stable, slow — local efficiency and clustering coefficient rise together
+      // Synchronized layer waves with radial local structure
+      const layerPhase = layerIdx * Math.PI * 0.5;
+      const layerWave  = Math.sin(t * 0.9 + layerPhase) * 0.5 + 0.5;
+      const dist       = Math.sqrt((x-cx)**2 + (z-cz)**2);
+      const radial     = Math.sin(t * 1.0 - dist * 1.0 + layerPhase * 0.5) * 0.5 + 0.5;
+      const symmetry   = Math.sin(t * 0.7 + (x+z) * 0.5) * 0.5 + 0.5;
+      return layerWave*0.45 + radial*0.35 + symmetry*0.2;
+    }
+
+    case 3: {
+      // EPOCH IV: 66–83 yrs
+      // Modularity rises — layers decouple into semi-independent modules
+      // Within-layer coherence maintained, cross-layer communication drops
+      const withinLayer  = Math.sin(t * 0.85 + layerIdx * 2.1 + wavePhase * 0.5) * 0.5 + 0.5;
+      const layerFade    = 1.0 - layerIdx * 0.18; // upper layers dimmer
+      const gap          = Math.sin(t * 1.4 + layerIdx * 1.7) > 0.25 ? 1 : 0;
+      const modularFlash = Math.sin(t * 0.6 + layerIdx * Math.PI * 0.5) * 0.5 + 0.5;
+      return withinLayer * gap * layerFade * 0.85 + modularFlash * 0.15;
+    }
+
+    case 4: {
+      // EPOCH V: 83–90+ yrs
+      // Only subgraph centrality in ~10 specific regions
+      // Fixed sparse constellation, very slow breathing
+      const key = (hIdx * 3 + layerIdx * 7) % 13;
+      if (key > 1) return 0; // ~85% LEDs off
+      const breath    = Math.sin(t * 0.28 + phase) * 0.5 + 0.5;
+      const deepPulse = Math.sin(t * 0.12 + key * 1.6) * 0.5 + 0.5;
+      return breath * deepPulse * 1.3;
+    }
+
+    default: return 0;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ORBIT CONTROLS
+// ─────────────────────────────────────────────────────────────────────────────
+let drag=false, rDrag=false, lx=0, ly=0;
+let theta=0.75, phi=0.52, rad=290, tX=6, tY=45, tZ=1;
+let autoRot=false;
+
+function updateCam(){
+  camera.position.set(tX+rad*Math.sin(phi)*Math.sin(theta), tY+rad*Math.cos(phi), tZ+rad*Math.sin(phi)*Math.cos(theta));
+  camera.lookAt(tX, tY, tZ);
+}
+canvas.addEventListener('mousedown', e=>{drag=true; rDrag=e.button===2; lx=e.clientX; ly=e.clientY;});
+canvas.addEventListener('contextmenu', e=>e.preventDefault());
+window.addEventListener('mouseup', ()=>drag=false);
+window.addEventListener('mousemove', e=>{
+  if(!drag) return;
+  const dx=e.clientX-lx, dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
+  if(rDrag){tX-=dx*0.25; tY+=dy*0.25;} else{theta-=dx*0.008; phi=Math.max(0.08,Math.min(Math.PI-0.08,phi-dy*0.008));}
+  updateCam();
+});
+canvas.addEventListener('wheel', e=>{rad=Math.max(60,Math.min(800,rad+e.deltaY*0.35)); updateCam();});
+canvas.addEventListener('touchstart', e=>{lx=e.touches[0].clientX; ly=e.touches[0].clientY;});
+canvas.addEventListener('touchmove', e=>{
+  e.preventDefault();
+  const dx=e.touches[0].clientX-lx, dy=e.touches[0].clientY-ly;
+  lx=e.touches[0].clientX; ly=e.touches[0].clientY;
+  theta-=dx*0.01; phi=Math.max(0.08,Math.min(Math.PI-0.08,phi-dy*0.01)); updateCam();
+},{passive:false});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EPOCH SWITCHING
+// ─────────────────────────────────────────────────────────────────────────────
+let currentEpoch=0;
+
+function setEpoch(idx){
+  currentEpoch=idx;
+  const ep=EPOCHS[idx];
+  document.documentElement.style.setProperty('--ec', ep.color);
+  document.documentElement.style.setProperty('--eg', ep.glow);
+  document.querySelectorAll('.ebtn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  document.getElementById('htitle').textContent = ep.name.replace('&amp;','&').toUpperCase() + ' — BRAIN TOPOLOGY';
+  document.getElementById('ctitle').innerHTML = ep.name;
+  document.getElementById('ctitle').style.color = ep.color;
+  document.getElementById('ctitle').style.textShadow = `0 0 12px ${ep.glow}`;
+  document.getElementById('crange').innerHTML = ep.range;
+  document.getElementById('ctheme').textContent = ep.theme;
+  document.getElementById('csci').innerHTML  = `<span>NEUROSCIENCE</span>${ep.sci}`;
+  document.getElementById('cvis').innerHTML  = `<span>VISUAL PATTERN</span>${ep.vis}`;
+  document.getElementById('cdriv').innerHTML = ep.driv;
+  ptMain.color.set(new THREE.Color(ep.color));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTO-CYCLE
+// ─────────────────────────────────────────────────────────────────────────────
+let autoCycle=false, cycleTimer=0;
+const CYCLE_DUR=14;
+function toggleAuto()  { autoRot=!autoRot;   document.getElementById('bAuto').classList.toggle('active',autoRot); }
+function toggleCycle() { autoCycle=!autoCycle; document.getElementById('bCycle').classList.toggle('active',autoCycle); }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RESIZE + RENDER LOOP
+// ─────────────────────────────────────────────────────────────────────────────
+function resize(){
+  const w=canvas.parentElement.clientWidth, h=canvas.parentElement.clientHeight;
+  renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize(); updateCam();
+
+const DT=1/60;
+let t=0;
+
+function animate(){
+  requestAnimationFrame(animate); t+=DT;
+  if(autoRot){ theta+=0.007; updateCam(); }
+  if(autoCycle){ cycleTimer+=DT; if(cycleTimer>CYCLE_DUR){ cycleTimer=0; setEpoch((currentEpoch+1)%5); } }
+
+  ptMain.intensity = 1.3 + 0.4*Math.sin(t*1.3);
+
+  leds.forEach(led=>{
+    const b = computeBrightness(led, currentEpoch, t);
+    led.brightness += (b - led.brightness) * 0.1;
+    const br = led.brightness;
+
+    led.mesh.material.color.set(LAYER_COLORS[led.layerIdx]);
+    led.mesh.material.emissive.set(LAYER_EMISSIVE[led.layerIdx]);
+    led.mesh.material.emissiveIntensity = br * 4.5;
+    led.mesh.material.opacity = Math.max(0.02, br * 0.96);
+
+    if(led.light){ led.light.color.set(LAYER_COLORS[led.layerIdx]); led.light.intensity = br * 5.5; }
+  });
+
+  renderer.render(scene, camera);
+}
+
+animate();
+setEpoch(0);
+</script>
+</body>
+</html>
