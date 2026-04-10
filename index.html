@@ -28,12 +28,12 @@
 
   #card { position:absolute; right:12px; top:50%; transform:translateY(-50%); width:232px; border:1px solid #0a1a12; background:rgba(1,3,2,0.94); padding:15px 17px; z-index:10; }
   #card .ctitle { font-family:'Cinzel',serif; font-size:14px; font-weight:900; color:var(--ec); text-shadow:0 0 12px var(--eg); display:block; margin-bottom:2px; transition:color 1s,text-shadow 1s; }
-  #card .crange { font-size:7px; letter-spacing:2px; color:#0f3020; text-transform:uppercase; display:block; margin-bottom:3px; }
-  #card .ctheme { font-size:7.5px; letter-spacing:1.5px; color:#0f3822; text-transform:uppercase; display:block; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #091510; }
-  #card .csection { font-size:8px; color:#1a4a2a; line-height:1.85; margin-bottom:8px; }
-  #card .csection span { color:var(--ec); opacity:0.6; display:block; font-size:7px; letter-spacing:1px; margin-bottom:3px; }
-  #card .cdriv { font-size:7.5px; color:#0f3020; margin-top:8px; padding-top:8px; border-top:1px solid #091510; line-height:1.8; }
-  #card .cdriv b { color:var(--ec); opacity:0.65; }
+  #card .crange { font-size:9px; letter-spacing:2px; color:#4a9070; text-transform:uppercase; display:block; margin-bottom:3px; }
+  #card .ctheme { font-size:9.5px; letter-spacing:1.5px; color:#5aaa80; text-transform:uppercase; display:block; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #1a3520; }
+  #card .csection { font-size:10px; color:#99ddbb; line-height:1.85; margin-bottom:8px; }
+  #card .csection span { color:var(--ec); opacity:0.85; display:block; font-size:8.5px; letter-spacing:1px; margin-bottom:3px; }
+  #card .cdriv { font-size:9.5px; color:#88ccaa; margin-top:8px; padding-top:8px; border-top:1px solid #1a3520; line-height:1.8; }
+  #card .cdriv b { color:var(--ec); opacity:0.9; }
 
   #legend { position:absolute; bottom:58px; right:12px; font-size:8px; color:#0f2818; line-height:2.1; z-index:10; }
   .ldot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:5px; vertical-align:middle; }
@@ -165,7 +165,7 @@ const EPOCHS = [
     range: "83 – 90+ years &nbsp;·&nbsp; Final epoch",
     theme: "Topology–age relationship dissolves",
     sci: "Only subgraph centrality remains significantly associated with age — and only in 10 specific brain regions: cuneus (bilateral), superior/middle occipital gyri, and postcentral gyrus. The global age–topology relationship has dissolved. Individual nodes carry the last meaningful signal.",
-    vis: "Nearly all LEDs extinguished. Only a sparse, fixed constellation breathes slowly — representing the 10 remaining age-sensitive regions. Deep, slow pulses. The brain reduced to its essential architecture.",
+    vis: "Global structure fades. A few key regions remain strongly active. More fragmented, locally clustered, less globally integrated.",
     driv: "Driving metric: <b>Subgraph Centrality</b> &nbsp;·&nbsp; Active regions: cuneus, occipital gyri, postcentral gyrus",
     color: "#aaaaff", glow: "#aaaaff35",
   },
@@ -315,7 +315,7 @@ function computeBrightness(led, epoch, t) {
     }
 
     case 1: {
-      // EPOCH II: 9–32 yrs
+      // EPOCH II: 9–32 yrs — PEAK brightness/activity in entire lifespan
       // Small-world peak: global efficiency AND local specialisation both rise
       // Traveling path = global efficiency (short paths), branching = local clustering
       const pathX = Math.sin(t * 0.65 + y * 0.9) * 1.8 + cx;
@@ -325,21 +325,25 @@ function computeBrightness(led, epoch, t) {
       const globalWave = Math.sin(t * 1.3 - (Math.abs(x-cx)+Math.abs(z-cz)) * 0.7) * 0.5 + 0.5;
       const localSpec  = Math.sin(t * 1.8 + x * 1.0 + z * 0.8 + wavePhase) * 0.5 + 0.5;
       const branch = localSpec > 0.7 ? (localSpec-0.7)*3.3 : 0;
-      // Upper layers slightly brighter — rising efficiency
-      const layerBoost = 1.0 + layerIdx * 0.15;
-      return Math.max(pathLight*0.9, globalWave*0.65, branch*0.75) * layerBoost;
+      // All layers very bright — peak integration across whole brain
+      const layerBoost = 1.25 + layerIdx * 0.18;
+      // Extra random flicker to show dynamic activity
+      const dynFlicker = Math.random() < 0.04 ? 0.6 : 0;
+      return Math.max(pathLight*1.1, globalWave*0.85, branch*0.95, dynFlicker) * layerBoost;
     }
 
     case 2: {
-      // EPOCH III: 32–66 yrs
-      // Stable, slow — local efficiency and clustering coefficient rise together
-      // Synchronized layer waves with radial local structure
+      // EPOCH III: 32–66 yrs — NOTICEABLE DROP from Adolescence peak
+      // Stable but significantly calmer — integration in decline, local efficiency rises
+      // Synchronized layer waves but much lower amplitude than Epoch II
       const layerPhase = layerIdx * Math.PI * 0.5;
       const layerWave  = Math.sin(t * 0.9 + layerPhase) * 0.5 + 0.5;
       const dist       = Math.sqrt((x-cx)**2 + (z-cz)**2);
       const radial     = Math.sin(t * 1.0 - dist * 1.0 + layerPhase * 0.5) * 0.5 + 0.5;
       const symmetry   = Math.sin(t * 0.7 + (x+z) * 0.5) * 0.5 + 0.5;
-      return layerWave*0.45 + radial*0.35 + symmetry*0.2;
+      // Upper layers fade more — global integration declining
+      const decayFactor = 1.0 - layerIdx * 0.12;
+      return (layerWave*0.32 + radial*0.22 + symmetry*0.14) * decayFactor;
     }
 
     case 3: {
@@ -355,13 +359,36 @@ function computeBrightness(led, epoch, t) {
 
     case 4: {
       // EPOCH V: 83–90+ yrs
-      // Only subgraph centrality in ~10 specific regions
-      // Fixed sparse constellation, very slow breathing
-      const key = (hIdx * 3 + layerIdx * 7) % 13;
-      if (key > 1) return 0; // ~85% LEDs off
-      const breath    = Math.sin(t * 0.28 + phase) * 0.5 + 0.5;
-      const deepPulse = Math.sin(t * 0.12 + key * 1.6) * 0.5 + 0.5;
-      return breath * deepPulse * 1.3;
+      // Global structure fades — a few key regions remain strongly active
+      // Fragmented, locally clustered, less globally integrated
+      // Several distinct clusters drift slowly around the grid, each pulsing independently
+
+      // Define ~4 drifting cluster centers that move slowly
+      const c0x = 1.5 + 1.4 * Math.sin(t * 0.18);
+      const c0z = 1.5 + 1.4 * Math.cos(t * 0.13);
+      const c1x = 1.5 + 1.4 * Math.sin(t * 0.21 + 2.1);
+      const c1z = 1.5 + 1.4 * Math.cos(t * 0.16 + 1.7);
+      const c2x = 1.5 + 1.2 * Math.sin(t * 0.14 + 4.2);
+      const c2z = 1.5 + 1.2 * Math.cos(t * 0.19 + 3.1);
+
+      const d0 = Math.sqrt((x - c0x) ** 2 + (z - c0z) ** 2);
+      const d1 = Math.sqrt((x - c1x) ** 2 + (z - c1z) ** 2);
+      const d2 = Math.sqrt((x - c2x) ** 2 + (z - c2z) ** 2);
+
+      // Each cluster has its own slow pulse, independent of others
+      const p0 = (Math.sin(t * 0.35 + 0.0) * 0.5 + 0.5) * Math.max(0, 1.0 - d0 * 0.75);
+      const p1 = (Math.sin(t * 0.29 + 2.0) * 0.5 + 0.5) * Math.max(0, 1.0 - d1 * 0.75);
+      const p2 = (Math.sin(t * 0.41 + 4.5) * 0.5 + 0.5) * Math.max(0, 1.0 - d2 * 0.75);
+
+      // Clusters are somewhat layer-specific — fragmented vertically too
+      const layerMatch = Math.sin(layerIdx * 1.3 + hIdx * 0.7 + t * 0.08) > 0.0 ? 1.0 : 0.4;
+
+      const clusterStrength = Math.max(p0, p1, p2) * layerMatch;
+
+      // Moderate global background — fragmented but not dead
+      const globalFade = 0.18 * (Math.sin(t * 0.22 + phase) * 0.5 + 0.5);
+
+      return Math.max(clusterStrength * 1.4, globalFade);
     }
 
     default: return 0;
